@@ -1,0 +1,24 @@
+[project]
+name = "alarm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Giovanni Caberlotto", email = "caberlotto.giovanni@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "paho-mqtt>=2.0",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pydantic>=2.5",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+]
+
+[project.scripts]
+alarm = "alarm:main"
+
+[build-system]
+requires = ["uv_build>=0.13.8,<0.14.0"]
+build-backend = "uv_build"
