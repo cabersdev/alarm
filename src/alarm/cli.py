@@ -10,15 +10,15 @@ import threading
 
 from .bootstrap import connect_with_retry, init_db_with_retry, make_client, setup_logging
 from .config import load_config
-from .publisher.allarm import MqttAlarmPublisher
+from .publisher.alarm import MqttAlarmPublisher
 from .publisher.sensor import MqttSensorPublisher
 from .publisher.stats import MqttStatsPublisher
-from .repository.allarm import AlarmRepository
+from .repository.alarm import AlarmRepository
 from .repository.sensor import SensorRepository
-from .service.allarm import AlarmService
+from .service.alarm import AlarmService
 from .service.sensor import SensorService
 from .service.stats import StatsService
-from .subscriber.allarm import AlarmSubscriber
+from .subscriber.alarm import AlarmSubscriber
 from .subscriber.stats import StatsSubscriber
 
 log = logging.getLogger("mcc.cli")

@@ -17,9 +17,9 @@ dependencies = [
 ]
 
 [project.scripts]
-mcc-sensor = "allarm.entrypoints.sensor:main"
-mcc-stats  = "allarm.entrypoints.stats:main"
-mcc-alarm  = "allarm.entrypoints.alarm:main"
+mcc-sensor = "alarm.entrypoints.sensor:main"
+mcc-stats  = "alarm.entrypoints.stats:main"
+mcc-alarm  = "alarm.entrypoints.alarm:main"
 
 [build-system]
 requires = ["uv_build>=0.13.8,<0.14.0"]

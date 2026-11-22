@@ -8,11 +8,11 @@ from ..bootstrap import (
     connect_with_retry, init_db_with_retry, make_client, run_forever, setup_logging,
 )
 from ..config import load_config
-from ..publisher.allarm import MqttAlarmPublisher
-from ..repository.allarm import AlarmRepository
-from ..schema.allarm import AlarmDecision
-from ..service.allarm import AlarmService
-from ..subscriber.allarm import AlarmSubscriber
+from ..publisher.alarm import MqttAlarmPublisher
+from ..repository.alarm import AlarmRepository
+from ..schema.alarm import AlarmDecision
+from ..service.alarm import AlarmService
+from ..subscriber.alarm import AlarmSubscriber
 
 log = logging.getLogger("mcc.alarm")
 
