@@ -1,40 +1,31 @@
-[database]
-url = "postgresql+psycopg://mcc:mcc_dev_password@localhost:5432/mcc"
-echo = false
+[mqtt]
+broker = "localhost"
+port = 1883
+keepalive = 60
 
 [sensor]
 topic_raw = "training/sensors/pressure/raw"
 publish_interval = 1.0
-id = "pressure-01"
-unit = "bar"
-
-# Param of the gaussian of the pressure measured by the sensor
 mean = 47.0
 std = 6.0
-
+sensor_id = "pressure-01"
+unit = "bar"
 
 [stats]
-topic_raw = "training/sensors/pressure/raw"
 topic_stats = "training/sensors/pressure/stats"
-
 window_size = 10
 mu0 = 50.0
 alpha = 0.05
+correction_method = "raw"   # "raw" | "bonferroni" | "sidak" | "holm" | "bh"
 p_history_size = 1000
 
-correction_method = "raw"
-
 [alarm]
-topic_stats = "training/sensors/pressure/stats"
 topic_alarm = "training/alarms/pressure"
-
-threshold = 50.0 # Critical pressure
+threshold = 50.0
 hysteresis = 1.0
 persistence_n = 3
-
 correction_method = "raw"
 
-[project.scripts]
-mcc-sensor = "alarm.entrypoints.sensor:main"
-mcc-stats  = "alarm.entrypoints.stats:main"
-mcc-alarm  = "alarm.entrypoints.alarm:main"
+[database]
+url = "postgresql+psycopg://mcc:mcc_dev_password@localhost:5432/mcc"
+echo = false

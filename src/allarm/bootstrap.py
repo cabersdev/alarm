@@ -121,7 +121,7 @@ def _mask(url: str) -> str:
     return url
 
 
-# ---- Lifecycle ----------------------------------------------------------
+# Lifecycle
 def run_forever(
     client: mqtt.Client,
     *,

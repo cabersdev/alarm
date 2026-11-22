@@ -1,0 +1,19 @@
+[Unit]
+Description=MCC Alarm Service
+After=mcc-stack.service mcc-stats.service
+Requires=mcc-stack.service
+Wants=mcc-stats.service
+
+[Service]
+Type=simple
+User=mcc
+Group=mcc
+WorkingDirectory=/opt/mcc
+ExecStart=/opt/mcc/venv/bin/mcc-alarm --config /opt/mcc/config.toml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

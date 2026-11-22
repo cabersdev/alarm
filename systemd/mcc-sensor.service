@@ -1,0 +1,18 @@
+[Unit]
+Description=MCC Pressure Sensor Simulator
+After=mcc-stack.service
+Requires=mcc-stack.service
+
+[Service]
+Type=simple
+User=mcc
+Group=mcc
+WorkingDirectory=/opt/mcc
+ExecStart=/opt/mcc/venv/bin/mcc-sensor --config /opt/mcc/config.toml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
