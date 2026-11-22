@@ -34,7 +34,7 @@ class Database:
             class_=Session,
         )
 
-    # ---- Schema management ------------------------------------------------
+    # Schema management
     def init_schema(self) -> None:
         """Create tables (idempotent) and ensure hypertables exist."""
         # Import models so they register on Base.metadata. Lazy import to
