@@ -1,31 +1,33 @@
+"""Alarm service: hysteresis + persistence on top of the t-test decision."""
+
 from __future__ import annotations
 
+import logging
 import time
-from typing import Literal, Optional, Protocol
+from typing import Protocol
 
+from ..repository.alarm import AlarmRepository
 from ..schema.alarm import AlarmDecision, AlarmState, AlarmTransition
 from ..schema.stats import CorrectionMethod, WindowStats
 
-from ..config import load_config
+log = logging.getLogger(__name__)
+
 
 class AlarmPublisher(Protocol):
     def publish(self, decision: AlarmDecision) -> None: ...
 
 
 class AlarmService:
-    """Hysteresis + persistence alarm on top of the t-test decision."""
-
-    cfg = load_config()
-
     def __init__(
         self,
         publisher: AlarmPublisher,
+        repository: AlarmRepository,
         *,
-        threshold: float = cfg.alarm.threshold,
-        hysteresis: float = cfg.alarm.hysteresis,
-        persistence_n: int = 3,
-        correction_method: CorrectionMethod = cfg.alarm.correction_method,
-        sensor_id: str = cfg.sensor.id,
+        threshold: float,
+        hysteresis: float,
+        persistence_n: int,
+        correction_method: CorrectionMethod,
+        sensor_id: str = "pressure-01",
     ) -> None:
         if persistence_n < 1:
             raise ValueError("persistence_n must be >= 1")
@@ -33,6 +35,7 @@ class AlarmService:
             raise ValueError("hysteresis must be >= 0")
 
         self._publisher = publisher
+        self._repository = repository
         self._threshold = threshold
         self._hysteresis = hysteresis
         self._persistence_n = persistence_n
@@ -43,17 +46,19 @@ class AlarmService:
         self._streak_reject = 0
         self._streak_below = 0
 
-    # Public API
+        log.info(
+            "alarm service ready: thr=%.3f hyst=%.3f persist=%d method=%s",
+            threshold, hysteresis, persistence_n, correction_method,
+        )
+
     def on_stats(self, window: WindowStats) -> AlarmDecision:
         previous_state = self._state
         rejected = self._is_rejected(window)
         below = window.mean < (self._threshold - self._hysteresis)
 
-        # Update streaks (always track the raw observations)
         self._streak_reject = self._streak_reject + 1 if rejected else 0
         self._streak_below = self._streak_below + 1 if below else 0
 
-        # Apply transitions
         transition: AlarmTransition
         if self._state == "OFF":
             if self._streak_reject >= self._persistence_n:
@@ -61,7 +66,7 @@ class AlarmService:
                 transition = "turn_on"
             else:
                 transition = "keep_off"
-        else:  # ON
+        else:
             if self._streak_below >= self._persistence_n:
                 self._state = "OFF"
                 transition = "turn_off"
@@ -85,12 +90,13 @@ class AlarmService:
         )
 
         if transition in ("turn_on", "turn_off"):
-            print(
+            log.info(
                 "alarm transition %s at window_seq=%d (lb=%.4f mean=%.4f thr=%.3f)",
                 transition, window.window_seq, window.lb, window.mean, self._threshold,
             )
 
         self._publisher.publish(decision)
+        self._repository.write(decision)
         return decision
 
     def reset(self) -> None:
@@ -102,9 +108,7 @@ class AlarmService:
     def state(self) -> AlarmState:
         return self._state
 
-    # Internals
     def _is_rejected(self, w: WindowStats) -> bool:
-        """Interpret the corrected p-value under the configured method."""
         if self._method == "raw":
             return w.p_value_raw < w.alpha
         if self._method == "bonferroni":

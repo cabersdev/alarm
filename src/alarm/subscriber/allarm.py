@@ -4,8 +4,9 @@ import paho.mqtt.client as mqtt
 from pydantic import ValidationError
 
 from ..schema.stats import WindowStats
-from ..service.alarm import AlarmService
+from ..service.allarm import AlarmService
 
+import logging
 log = logging.getLogger(__name__)
 
 

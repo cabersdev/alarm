@@ -10,15 +10,15 @@ import threading
 
 from .bootstrap import connect_with_retry, init_db_with_retry, make_client, setup_logging
 from .config import load_config
-from .publisher.alarm import MqttAlarmPublisher
+from .publisher.allarm import MqttAlarmPublisher
 from .publisher.sensor import MqttSensorPublisher
 from .publisher.stats import MqttStatsPublisher
-from .repository.alarm import AlarmRepository
+from .repository.allarm import AlarmRepository
 from .repository.sensor import SensorRepository
-from .service.alarm import AlarmService
+from .service.allarm import AlarmService
 from .service.sensor import SensorService
 from .service.stats import StatsService
-from .subscriber.alarm import AlarmSubscriber
+from .subscriber.allarm import AlarmSubscriber
 from .subscriber.stats import StatsSubscriber
 
 log = logging.getLogger("mcc.cli")
@@ -41,10 +41,15 @@ def main() -> int:
     )
     stats_svc = StatsService(
         MqttStatsPublisher(client, cfg.stats.topic_stats),
-        window_size=cfg.stats.window_size, mu0=cfg.stats.mu0,
-        alpha=cfg.stats.alpha, correction_method=cfg.stats.correction_method,
+        window_size=cfg.stats.window_size,
+        mu0=cfg.stats.mu0,
+        alpha=cfg.stats.alpha,
+        correction_method=cfg.stats.correction_method,
+        p_history_size=cfg.stats.p_history_size,
         sensor_id=cfg.sensor.sensor_id,
-        mu_true=cfg.sensor.mean, sigma_true=cfg.sensor.std,
+        compute_shapiro=cfg.stats.compute_shapiro,
+        mu_true=cfg.sensor.mean if cfg.stats.use_ground_truth else None,
+        sigma_true=cfg.sensor.std if cfg.stats.use_ground_truth else None,
     )
     alarm_svc = AlarmService(
         MqttAlarmPublisher(client, cfg.alarm.topic_alarm), AlarmRepository(db),

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import logging
-
 import paho.mqtt.client as mqtt
 
 from ..schema.sensor import SensorReading
 
+import logging
+log = logging.getLogger(__name__)
 
 class MqttSensorPublisher:
     def __init__(
@@ -25,4 +25,6 @@ class MqttSensorPublisher:
         payload = reading.model_dump_json()
         info = self._client.publish(self._topic, payload, qos=self._qos, retain=self._retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
-            print(f"publish failed on {self._topic} (seq={reading.sequence}): rc={info.rc}")
+            log.warning(
+                f"publish failed on {self._topic} (seq={reading.sequence}): rc={info.rc}"
+            )

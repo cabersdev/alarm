@@ -6,6 +6,9 @@ import paho.mqtt.client as mqtt
 
 from ..schema.stats import WindowStats
 
+import logging
+log = logging.getLogger(__name__)
+
 class MqttStatsPublisher:
     def __init__(
         self,
@@ -27,6 +30,6 @@ class MqttStatsPublisher:
         payload = stats.model_dump_json(exclude=exclude)
         info = self._client.publish(self._topic, payload, qos=self._qos, retain=self._retain)
         if info.rc != mqtt.MQTT_ERR_SUCCESS:
-            print(
+            log.warning(
                 f"publish failed on {self._topic} (seq={stats.window_seq}): rc={info.rc}"
-                )
+            )

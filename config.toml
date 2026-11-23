@@ -18,6 +18,8 @@ mu0 = 50.0
 alpha = 0.05
 correction_method = "raw"   # "raw" | "bonferroni" | "sidak" | "holm" | "bh"
 p_history_size = 1000
+compute_shapiro = false
+use_ground_truth = false
 
 [alarm]
 topic_alarm = "training/alarms/pressure"
