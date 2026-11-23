@@ -16,7 +16,7 @@ from .db import Database
 log = logging.getLogger("mcc.bootstrap")
 
 
-# ---- Logging -------------------------------------------------------------
+# Logging
 def setup_logging(*, level: int = logging.INFO) -> None:
     """One log line format, consistent across the three services.
 
@@ -31,7 +31,7 @@ def setup_logging(*, level: int = logging.INFO) -> None:
     )
 
 
-# ---- MQTT ---------------------------------------------------------------
+# MQTT
 def make_client(client_id: str) -> mqtt.Client:
     """Create a paho client with clean_session=False.
 
@@ -82,7 +82,7 @@ def connect_with_retry(
     ) from last_exc
 
 
-# ---- Database -----------------------------------------------------------
+# Database
 def init_db_with_retry(
     config_path: str = "config.toml",
     *,

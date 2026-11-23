@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: TimescaleDB
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    user: mcc
+    secureJsonData:
+      password: mcc_dev_password
+    jsonData:
+      database: mcc           # <-- QUI, dentro jsonData
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    isDefault: true
+    editable: false

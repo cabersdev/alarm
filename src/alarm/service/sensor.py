@@ -7,29 +7,31 @@ from typing import Optional, Protocol
 
 import numpy as np
 
+from ..repository.sensor import SensorRepository
 from ..schema.sensor import SensorReading
 
-from ..config import load_config
+log = logging.getLogger(__name__)
+
 
 class SensorPublisher(Protocol):
-    """Anything that can publish a SensorReading"""
+    """Anything that can publish a SensorReading (MQTT, in-memory, file...)."""
 
     def publish(self, reading: SensorReading) -> None: ...
 
-class SensorService:
-    """Generate Gaussian samples on a fixed schedule and publish them."""
 
-    cfg = load_config()
+class SensorService:
+    """Generate Gaussian samples on a fixed schedule, publish and persist them."""
 
     def __init__(
         self,
         publisher: SensorPublisher,
+        repository: SensorRepository,
         *,
-        mean: float = cfg.sensor.mean,
-        std: float = cfg.sensor.std,
-        interval: float = cfg.sensor.publish_interval,
-        sensor_id: str = cfg.sensor.id,
-        unit: str = cfg.sensor.unit,
+        mean: float,
+        std: float,
+        interval: float = 1.0,
+        sensor_id: str = "pressure-01",
+        unit: str = "bar",
         rng: Optional[np.random.Generator] = None,
     ) -> None:
         if std <= 0:
@@ -38,13 +40,14 @@ class SensorService:
             raise ValueError(f"interval must be > 0, got {interval}")
 
         self._publisher = publisher
+        self._repository = repository
         self._mean = mean
         self._std = std
         self._interval = interval
         self._sensor_id = sensor_id
         self._unit = unit
         # default_rng() without seed -> non-reproducible;
-        # pass a seeded one for test porpuse
+        # pass a seeded one for tests
         self._rng = rng or np.random.default_rng()
 
         self._sequence = 0
@@ -54,20 +57,27 @@ class SensorService:
     # Lifecycle
     def start(self) -> None:
         """Blocking run loop; returns when stop() is called."""
-
+        log.info(
+            "sensor %s starting: N(%.3f, %.3f^2), interval=%.3fs",
+            self._sensor_id, self._mean, self._std, self._interval,
+        )
         try:
             while not self._stop.is_set():
                 reading = self._next_reading()
                 self._publisher.publish(reading)
+                self._repository.write(reading)
                 # wait() returns immediately if stop() is called, unlike time.sleep
                 self._stop.wait(self._interval)
         finally:
-            print(f"sensor {self._sensor_id} stopped at sequence={self._sequence}")
+            log.info(
+                "sensor %s stopped at sequence=%d",
+                self._sensor_id, self._sequence,
+            )
 
     def start_in_background(self) -> threading.Thread:
         """Run start() in a daemon thread and return it."""
         self._thread = threading.Thread(
-            target=self.start, name=f"sensor-{self._sensor_id}", daemon=True
+            target=self.start, name=f"sensor-{self._sensor_id}", daemon=True,
         )
         self._thread.start()
         return self._thread

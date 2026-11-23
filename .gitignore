@@ -9,3 +9,7 @@ wheels/
 
 # Virtual environments
 .venv
+timescaledb/data/
+grafana/data/
+mosquitto/data/
+mosquitto/log/

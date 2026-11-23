@@ -53,7 +53,7 @@ class Database:
                     f"SELECT create_hypertable('{table}', '{time_col}', "
                     f"if_not_exists => TRUE, migrate_data => TRUE)"
                 ))
-        print("hypertables ensured: %s", [t for t, _ in _HYPERTABLES])
+        print("hypertables ensured: %s" + str([t for t, _ in _HYPERTABLES]))
 
     # Session management
     @contextmanager
