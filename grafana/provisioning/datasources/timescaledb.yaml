@@ -9,7 +9,7 @@ datasources:
     secureJsonData:
       password: mcc_dev_password
     jsonData:
-      database: mcc           # <-- QUI, dentro jsonData
+      database: mcc
       sslmode: disable
       postgresVersion: 1600
       timescaledb: true
